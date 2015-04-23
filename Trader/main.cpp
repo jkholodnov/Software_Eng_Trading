@@ -2,6 +2,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <ctime>
+#include <stdlib.h>
+#include "stock.hpp"
 
 using namespace std;
 
@@ -21,10 +24,41 @@ int main() {
         return 0;
     }
 
-    string line{""};
-    while (getline(inputs, line)) {
-        auto x = line.find(",");
-        auto g = line.substr(0, x);
-        cout << g << endl;
+    vector<stock> Stocks_being_monitored{};
+
+    string g;
+    while (inputs >> g) {
+        auto pos = g.find(",");
+        auto stocksymbol = g.substr(0, pos);
+        Stocks_being_monitored.emplace_back(stocksymbol);
+    }
+
+    cout << "READ IN STOCK SYMBOLS. Proceeding to execute trades." << endl;
+
+    time_t now = time(0);
+
+    tm *ltm = localtime(&now);
+    cout << "Time: " << ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec << endl;
+
+    bool stock_hours = true;
+    while (stock_hours) {
+        cout << ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec << endl;
+        if (ltm->tm_hour < 9) {
+            cout << "Stock market hasnt opened yet." << endl;
+            break;
+        }
+        if (ltm->tm_hour > 16 && ltm->tm_min > 30) {
+            cout << "Stock market has closed." << endl;
+            break;
+        }
+        cout << "Stock market is open. Executing trades." << endl;
+        for (auto &stock : Stocks_being_monitored) {
+            // GET THE CURRENT PRICE OF STOCK...//
+            double current_price = stock.price + (rand() % 5);
+            stock.add_stock_tick(current_price);
+        }
+
+        now = time(0);
+        ltm = localtime(&now);
     }
 }
